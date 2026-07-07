@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NutriFit Pro</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        /* --- 🌌 בסיס עיצוב פרימיום כהה עמוק --- */
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            background-color: #090d16; color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .app-container { max-width: 420px; margin: 0 auto; padding: 16px; padding-bottom: 95px; box-sizing: border-box; }
+        
+        /* כרטיסיות ממוסגרות בגוון פחם */
+        .premium-card { background-color: #111827; border: 1px solid #1f293d; border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+        
+        /* שדות קלט כהים יוקרתיים */
+        input, select {
+            width: 100%; background-color: #1a2333; color: #ffffff; border: 1px solid #2d394e;
+            border-radius: 10px; padding: 10px; margin-top: 4px; margin-bottom: 12px; box-sizing: border-box; font-size: 14px;
+        }
+        button.btn-primary {
+            width: 100%; background-color: #1a2333; color: #ffffff; font-weight: bold;
+            border: 1px solid #2d394e; border-radius: 10px; padding: 10px; cursor: pointer; font-size: 14px;
+        }
+        button.btn-primary:hover { background-color: #243249; }
+        
+        /* צ'יפים של סינון במזווה */
+        .chips-container { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; margin-bottom: 12px; list-style: none; padding-inline-start: 0; }
+        .chip { background-color: #1a2333; color: #94a3b8; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: bold; white-space: nowrap; cursor: pointer; border: 1px solid transparent; }
+        .chip.active { background-color: #22c55e; color: #ffffff; }
+
+        /* לוח שנה פרימיום שטוח (HTML Grid) קשיח */
+        .cal-container { background-color: #111827; border: 1px solid #1f293d; border-radius: 16px; padding: 12px; margin-bottom: 15px; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: bold; }
+        .cal-arrow { color: #22c55e; font-weight: bold; cursor: pointer; user-select: none; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; text-align: center; direction: rtl; }
+        .cal-day-name { color: #64748b; font-size: 11px; font-weight: bold; padding-bottom: 4px; }
+        .cal-day-num { color: #94a3b8; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; margin: 0 auto; font-size: 13px; font-weight: 600; cursor: pointer; }
+        .cal-day-num.active { background-color: #22c55e; color: #ffffff; font-weight: bold; }
+
+        /* --- 📱 סרגל ניווט תחתון קבוע ב-HTML/CSS טהור --- */
+        .native-app-bottom-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 65px; background-color: #111827; border-top: 1px solid #1f293d; display: flex; flex-direction: row; justify-content: space-around; align-items: center; z-index: 9999; padding-bottom: env(safe-area-inset-bottom); }
+        .nav-bar-item { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; color: #64748b; text-decoration: none; font-size: 11px; font-weight: bold; height: 100%; cursor: pointer; }
+        .nav-bar-item.active { color: #22c55e; }
+        .nav-bar-icon { font-size: 18px; margin-bottom: 2px; }
+
+        /* חלונית דיאלוג/מודאל מובנית צפה */
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .modal-content { background: #111827; border: 1px solid #1f293d; border-radius: 16px; width: 100%; max-width: 380px; padding: 20px; box-sizing: border-box; position: relative; }
+        .modal-close { position: absolute; top: 12px; left: 12px; color: #64748b; cursor: pointer; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <div class="app-container" id="main-content-area">
+        {{ content | safe }}
+    </div>
+
+    <div class="native-app-bottom-bar">
+        <div hx-get="/tab/dashboard" hx-target="#main-content-area" class="nav-bar-item {% if active_tab == 'dashboard' %}active{% endif %}">
+            <span class="nav-bar-icon">📊</span><span class="nav-bar-text">דאשבורד</span>
+        </div>
+        <div hx-get="/tab/diary" hx-target="#main-content-area" class="nav-bar-item {% if active_tab == 'diary' %}active{% endif %}">
+            <span class="nav-bar-icon">🍴</span><span class="nav-bar-text">תפריט</span>
+        </div>
+        <div hx-get="/tab/pantry" hx-target="#main-content-area" class="nav-bar-item {% if active_tab == 'pantry' %}active{% endif %}">
+            <span class="nav-bar-icon">🍏</span><span class="nav-bar-text">המזווה</span>
+        </div>
+        <div hx-get="/tab/profile" hx-target="#main-content-area" class="nav-bar-item {% if active_tab == 'profile' %}active{% endif %}">
+            <span class="nav-bar-icon">👤</span><span class="nav-bar-text">פרופיל</span>
+        </div>
+    </div>
+
+    <div id="modal-container"></div>
+
+    <script>
+        document.querySelectorAll('.nav-bar-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-bar-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+        function closeModal() { document.getElementById('modal-container').innerHTML = ''; }
+    </script>
+</body>
+</html>
