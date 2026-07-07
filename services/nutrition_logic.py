@@ -9,7 +9,7 @@ class NutritionManager:
         meals = self.db.get_diary_by_date(today_str)
         total_cal = sum(item["calories"] for item in meals)
         total_prot = sum(item["protein"] for item in meals)
-        return {"calories": total_cal, "protein": total_prot}
+        return {"calories": total_cal, "protein": total_prot, "meals": meals}
 
     def get_goals(self):
         profile = self.db.get_profile() or {}
