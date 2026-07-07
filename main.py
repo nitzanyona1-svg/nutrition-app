@@ -8,18 +8,14 @@ from services.nutrition_logic import NutritionManager
 from datetime import date
 from dotenv import load_dotenv
 
-# 1. טעינת משתני סביבה מהקובץ .env
 load_dotenv()
 
-# 2. משיכה בטוחה של המפתחות (עם fallback שימנע קריסה)
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "")
 
-# אתחול האפליקציה והתבניות
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-# 3. אתחול המחלקות (OOP)
 if SUPABASE_URL and SUPABASE_KEY:
     db = DatabaseService(SUPABASE_URL, SUPABASE_KEY)
     nutrition = NutritionManager(db)
@@ -28,11 +24,9 @@ else:
     db = None
     nutrition = None
 
-# --- נתיבים (Routes) ---
-
 @app.get("/")
 def index(request: Request):
-    return templates.TemplateResponse("layout.html", {"request": request, "active_tab": "dashboard"})
+    return templates.TemplateResponse(request=request, name="layout.html", context={"active_tab": "dashboard"})
 
 @app.get("/tab/dashboard")
 def get_dashboard(request: Request):
@@ -46,8 +40,7 @@ def get_dashboard(request: Request):
     cal_left = max(goals["calories"] - summary["calories"], 0)
     prot_left = max(goals["protein"] - summary["protein"], 0)
     
-    return templates.TemplateResponse("dashboard.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="dashboard.html", context={
         "total_cal": summary["calories"],
         "total_prot": summary["protein"],
         "cal_left": cal_left,
@@ -61,8 +54,33 @@ def get_diary(request: Request, selected_date: str = str(date.today())):
         return HTMLResponse("שגיאה: מסד הנתונים לא מחובר.")
         
     summary = nutrition.get_daily_summary(selected_date)
-    return templates.TemplateResponse("diary.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="diary.html", context={
+        "meals": summary["meals"],
+        "selected_date": selected_date,
+        "active_tab": "diary"
+    })
+
+# --- הפונקציה החדשה שקולטת ארוחה מהטופס ---
+@app.post("/diary/add")
+def add_meal_to_diary(request: Request, 
+                      food_name: str = Form(...), 
+                      calories: int = Form(...), 
+                      protein: float = Form(...), 
+                      selected_date: str = Form(...)):
+    if not db:
+        return HTMLResponse("שגיאה: מסד הנתונים לא מחובר.")
+        
+    meal_data = {
+        "date": selected_date,
+        "food_name": food_name,
+        "calories": calories,
+        "protein": protein
+    }
+    db.add_meal_to_diary(meal_data)
+    
+    # מיד אחרי השמירה, טוענים מחדש את יומן התזונה המעודכן
+    summary = nutrition.get_daily_summary(selected_date)
+    return templates.TemplateResponse(request=request, name="diary.html", context={
         "meals": summary["meals"],
         "selected_date": selected_date,
         "active_tab": "diary"
@@ -74,8 +92,7 @@ def get_pantry(request: Request):
         return HTMLResponse("שגיאה: מסד הנתונים לא מחובר.")
         
     products = db.get_pantry_products()
-    return templates.TemplateResponse("pantry.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="pantry.html", context={
         "products": products,
         "active_tab": "pantry"
     })
@@ -86,8 +103,7 @@ def get_profile(request: Request):
         return HTMLResponse("שגיאה: מסד הנתונים לא מחובר.")
         
     profile = db.get_profile() or {}
-    return templates.TemplateResponse("profile.html", {
-        "request": request,
+    return templates.TemplateResponse(request=request, name="profile.html", context={
         "profile": profile,
         "active_tab": "profile"
     })

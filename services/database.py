@@ -35,6 +35,14 @@ class DatabaseService:
         except Exception:
             return []
 
+    # הוספנו פונקציה חדשה ששומרת ארוחה ב-SQL!
+    def add_meal_to_diary(self, meal_data):
+        try:
+            return self.client.table("meal_diary").insert(meal_data).execute()
+        except Exception as e:
+            print(f"Error adding meal: {e}")
+            return None
+
     # --- מזווה ---
     def get_pantry_products(self):
         try:

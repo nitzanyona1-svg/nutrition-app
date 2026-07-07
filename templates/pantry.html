@@ -1,0 +1,17 @@
+<div class="premium-card">
+    <h2 style="margin-top:0;">🍏 המזווה שלי</h2>
+    {% if products %}
+        <ul style="list-style: none; padding: 0; margin: 0;">
+        {% for p in products %}
+            <li style="border-bottom: 1px solid #1f293d; padding: 12px 0;">
+                <strong style="font-size: 1.1em;">{{ p.name }}</strong><br>
+                <span style="color: #9ca3af; font-size: 0.9em;">
+                    {{ p.calories }} קל' ל-100 גרם | {{ p.protein }} גרם חלבון
+                </span>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p style="color: #9ca3af; text-align: center; margin-top: 20px;">המזווה ריק כרגע.</p>
+    {% endif %}
+</div>

@@ -1,0 +1,26 @@
+<div class="premium-card">
+    <h2 style="margin-top:0;">👤 הגדרות פרופיל</h2>
+    <form hx-post="/profile/save" hx-target="#main-content-area">
+        <label>משקל (ק"ג):</label>
+        <input type="number" step="0.1" name="weight_kg" value="{{ profile.get('weight_kg', '') }}" required>
+        
+        <label>גובה (ס"מ):</label>
+        <input type="number" step="0.1" name="height_cm" value="{{ profile.get('height_cm', '') }}" required>
+        
+        <label>משקל יעד (ק"ג):</label>
+        <input type="number" step="0.1" name="target_weight_kg" value="{{ profile.get('target_weight_kg', '') }}" required>
+        
+        <label>תאריך יעד:</label>
+        <input type="date" name="target_date" value="{{ profile.get('target_date', '') }}" required>
+        
+        <label>יעד קלוריות יומי (ידני):</label>
+        <input type="number" name="custom_calories" value="{{ profile.get('custom_calories', 1700) }}">
+        
+        <label>יעד חלבון יומי (גרם):</label>
+        <input type="number" name="custom_protein" value="{{ profile.get('custom_protein', 120) }}">
+        
+        <button type="submit" style="background-color:#22c55e; margin-top:15px; width: 100%; padding: 12px; border-radius: 8px; border: none; color: white; font-weight: bold; font-size: 16px; cursor: pointer;">
+            💾 שמור עדכונים ל-SQL
+        </button>
+    </form>
+</div>
